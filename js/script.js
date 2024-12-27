@@ -2,14 +2,13 @@ class Counter {
   constructor(element, options = {}) {
     this.element = element;
     this.options = {
-      startFrom: Number(element.dataset.startFrom || 0),
-      target: Number(element.dataset.target || 0),
-      duration: Number(element.dataset.duration || 1000),
+      startFrom: +(element.dataset.startFrom || 0),
+      target: +(element.dataset.target || 0),
+      duration: +(element.dataset.duration || 1000),
       showFloat: element.dataset.showFloat === "true",
-      delay: Number(element.dataset.delay || 0),
+      delay: +(element.dataset.delay || 0),
     };
 
-    // Override defaults with provided options
     this.options = { ...this.options, ...options };
 
     // Initialize state
@@ -61,7 +60,7 @@ class Counter {
       }, intervalTime);
     };
 
-    // Apply delay if specified
+    // For delaying the start
     if (this.options.delay > 0) {
       setTimeout(startCount, this.options.delay);
     } else {
