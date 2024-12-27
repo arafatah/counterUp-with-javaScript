@@ -1,0 +1,45 @@
+body {
+    font-family: Arial, sans-serif;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background-color: #f4f4f9;
+    margin: 0;
+}
+
+.counter-container {
+    display: grid;
+    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    padding: 20px;
+    max-width: 1200px;
+    width: 100%;
+    text-align: center;
+}
+
+.counter {
+    font-size: 50px;
+    font-weight: bold;
+    position: relative;
+    color: #333;
+    padding: 20px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.counter:hover {
+    transform: scale(1.05);
+}
+
+.counter span {
+    display: block;
+    font-size: 40px;
+}
+
+.counter-title {
+    font-size: 18px;
+    color: #777;
+}
