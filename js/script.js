@@ -287,7 +287,6 @@ class Counter {
       startFrom: extractNumericValue(element.dataset.startFrom || '0'),
       target: extractNumericValue(element.dataset.target || '0'),
       duration: +(element.dataset.duration || 1000),
-      showFloat: element.dataset.showFloat === "true",
       delay: +(element.dataset.delay || 0),
     };
     
@@ -314,32 +313,30 @@ class Counter {
     const pattern = {
       parts: [], // Store all parts in order
       thousandsSeparator: '',
-      decimalSeparator: '.'
+      decimalSeparator: '.',
+      wholePartFormat: '', // Store the exact format of the whole number part
+      decimalPartFormat: '' // Store the exact format of the decimal part
     };
 
     // Remove all whitespace
     str = str.trim();
 
-    // Split the string into numeric and non-numeric parts while preserving order
-    const parts = str.split(/(-?\d*\.?\d+)/);
+    // Split the string into parts
+    const parts = str.split(/(-?\d+\.?\d*)/);
     pattern.parts = parts.filter(part => part); // Remove empty strings
 
-    // Detect thousands separator and decimal separator in the numeric part
+    // Find numeric part to analyze format
     const numericPart = parts.find(part => /\d/.test(part));
     if (numericPart) {
+      const [wholePart, decimalPart] = numericPart.split('.');
+      
+      // Store exact format of whole and decimal parts
+      pattern.wholePartFormat = wholePart;
+      pattern.decimalPartFormat = decimalPart || '';
+
+      // Detect separators
       if (numericPart.includes(',')) {
         pattern.thousandsSeparator = ',';
-      }
-      
-      // If there's a different decimal separator, detect it
-      if (numericPart.includes('.')) {
-        const parts = numericPart.split('.');
-        if (parts.length > 1) {
-          const lastChar = numericPart.charAt(numericPart.lastIndexOf(parts[1]) - 1);
-          if (lastChar !== '.') {
-            pattern.decimalSeparator = lastChar;
-          }
-        }
       }
     }
 
@@ -347,30 +344,29 @@ class Counter {
   }
 
   calculateDecimalPlaces() {
-    if (!this.options.showFloat) return 0;
-    
-    // Find the numeric part in the original string
-    const numericPart = this.originalTargetString.match(/-?\d*\.?\d+/)[0];
-    const decimalPart = numericPart.split(this.formatPattern.decimalSeparator)[1];
-    return decimalPart ? decimalPart.length : 0;
+    // Check if the original string has decimal places
+    return this.formatPattern.decimalPartFormat.length;
   }
 
   formatNumber(number) {
-    // Convert number to string with proper decimal places
-    let formattedNumber = number.toFixed(this.decimalPlaces);
-
-    // Split number into whole and decimal parts
-    let [wholePart, decimalPart] = formattedNumber.split('.');
+    // Get the whole and decimal parts of the current number
+    let [wholePart, decimalPart] = number.toFixed(this.decimalPlaces).split('.');
+    
+    // Determine the length of the whole part format
+    const targetWholeLength = this.formatPattern.wholePartFormat.length;
+    
+    // Pad with zeros to match original format length
+    wholePart = wholePart.padStart(targetWholeLength, '0');
 
     // Add thousands separator if present in original format
     if (this.formatPattern.thousandsSeparator) {
       wholePart = wholePart.replace(/\B(?=(\d{3})+(?!\d))/g, this.formatPattern.thousandsSeparator);
     }
 
-    // Reconstruct number with proper separators
-    formattedNumber = wholePart;
+    // Reconstruct number with proper format
+    let formattedNumber = wholePart;
     if (decimalPart) {
-      formattedNumber += this.formatPattern.decimalSeparator + decimalPart;
+      formattedNumber += '.' + decimalPart;
     }
 
     // Replace the numeric part in the original format
